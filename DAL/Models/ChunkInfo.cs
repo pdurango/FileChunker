@@ -12,9 +12,9 @@ namespace DAL.Models
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public int Id { get; set; }
 
-		public string Name { get; set; }
+		public string Name { get; set; } //i.e. 0.dat (incude ext)
 
-		public virtual FileInfo FileInfo { get; set; }
-		public virtual DriveInfo DriveInfo { get; set; }
+		public virtual MetaInfo MetaInfo { get; set; }
+		public virtual LocationInfo LocationInfo { get; set; }
 	}
 }

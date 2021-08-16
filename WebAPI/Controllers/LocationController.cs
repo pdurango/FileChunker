@@ -2,33 +2,56 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DAL;
+using DAL.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace WebAPI.Controllers
 {
 	[ApiController]
-	[Route("[controller]")]
+	[Route("api/[controller]")]
 	public class LocationController : ControllerBase
 	{
-		private readonly ILogger<LocationController> _logger;
+		private readonly ILogger<LocationController> m_logger;
+		private readonly DataContext m_context;
 
-		public LocationController(ILogger<LocationController> logger)
+		public LocationController(ILogger<LocationController> logger, DataContext context)
 		{
-			_logger = logger;
+			m_logger = logger;
+			m_context = context;
 		}
 
 		[HttpGet]
-		public IEnumerable<WeatherForecast> Get()
+		public async Task<ActionResult<IEnumerable<LocationInfo>>> GetAll()
 		{
-			var rng = new Random();
-			return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-			{
-				Date = DateTime.Now.AddDays(index),
-				TemperatureC = rng.Next(-20, 55),
-				Summary = Summaries[rng.Next(Summaries.Length)]
-			})
-			.ToArray();
+			return Ok(await m_context.LocationInfoSet.ToListAsync());
+		}
+
+		[HttpGet("{id}")]
+		public async Task<ActionResult<LocationInfo>> Get(int id)
+		{
+			return Ok(await m_context.LocationInfoSet.FirstOrDefaultAsync(l => l.Id == id));
+		}
+
+		[HttpPost]
+		public async Task<ActionResult> AddLocation(LocationInfo info)
+		{
+			await m_context.LocationInfoSet.AddAsync(info);
+			await m_context.SaveChangesAsync();
+
+			return Created("", info);
+		}
+
+		[HttpDelete]
+		public async Task<ActionResult> DeleteLocation(int id)
+		{
+			var location = await m_context.LocationInfoSet.FirstOrDefaultAsync(l => l.Id == id);
+			m_context.Remove(location);
+			await m_context.SaveChangesAsync();
+
+			return Ok();
 		}
 	}
 }
