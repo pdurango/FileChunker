@@ -25,7 +25,7 @@ namespace FileChunker
 
             //SplitFile(file, outputDir);
             Chunker.SplitFile(file, outputDir);
-            Chunker.MergeChunks(outputDir);
+            Chunker.MergeChunks(outputDir, Path.GetFileName(file));
         }
 
         
