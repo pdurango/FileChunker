@@ -6,6 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ChunkMover.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ChunkMover.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DAL\DAL.csproj" />
   </ItemGroup>
 

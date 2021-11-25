@@ -58,9 +58,9 @@ namespace FileChunker
 
             int locationIdx = 0, curBucketCount = 0, percentage = 0;
             //Number of total buckets to create
-            int bucketSize = fileCount / locationCount;
+            int bucketSize = fileCount / locationCount; //make sure location has enough space - sans
 
-            for(int i = 0; i < fileCount; i++)
+            for (int i = 0; i < fileCount; i++)
             {
                 /*
                  * 1. Iterate through files
@@ -128,7 +128,7 @@ namespace FileChunker
 
         public static string MergeChunks(string directory, string fileName)
         {
-            //Need to fetch files in order - this seems ineffieicnet so find a better solution
+            //Need to fetch files in order - this seems inefficient so find a better solution
             var inputFiles = Directory.GetFiles(directory)
                 .OrderBy(n => Convert.ToInt32(Path.GetFileNameWithoutExtension(n))).ToList();
 
