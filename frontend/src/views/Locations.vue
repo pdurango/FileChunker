@@ -1,10 +1,15 @@
 <template>
-  <div>fsdfds</div>
+  <div>
+    <LocationList />
+  </div>
 </template>
 
 <script>
-export default {};
-</script>
+import LocationList from "../components/LocationList.vue";
 
-<style scoped>
-</style>
+export default {
+  components: {
+    LocationList
+  }
+};
+</script>

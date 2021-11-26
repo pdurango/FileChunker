@@ -119,8 +119,10 @@ namespace FileChunker
 
             Directory.CreateDirectory(tmpFolder);
 
+            //todo - why do i do this?
             foreach (var chunk in chunks)
-                File.Copy(Path.Combine(chunk.LocationInfo.Path, fileNameWithoutExt, chunk.Name),
+                File.Copy(
+                    Path.Combine(chunk.LocationInfo.Path, fileNameWithoutExt, chunk.Name), 
                     Path.Combine(tmpFolder, chunk.Name));
 
             return MergeChunks(tmpFolder, fileName);

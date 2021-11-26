@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DAL;
 using DAL.Models;
 using FileChunker;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.Logging;
 
 namespace WebAPI.Controllers
 {
+	[EnableCors("_myAllowSpecificOrigins")]
 	[ApiController]
 	[Route("api/[controller]")]
 	public class FileController : ControllerBase
@@ -27,13 +29,37 @@ namespace WebAPI.Controllers
 			m_context = context;
 		}
 
-		/*[HttpGet("{id}")]
-		public async Task<ActionResult<LocationInfo>> Get(int id)
+		[HttpGet]
+		public async Task<ActionResult<IEnumerable<LocationInfo>>> GetAll()
 		{
-			return Ok(await m_context.LocationInfoSet.FirstOrDefaultAsync(l => l.Id == id));
-		}*/
+			return Ok(await m_context.MetaInfoSet.ToListAsync());
+		}
 
-		//[RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
+		[HttpGet("{id}")]
+		public async Task<IActionResult> GetFile(int id)
+		{
+			var chunks = m_context.ChunkInfoSet
+				.Where(f => f.MetaInfo.Id == id)
+				.Include(l => l.LocationInfo)
+				.ToList();
+
+			if (chunks.Count == 0)
+				return Content("File does not exist.");
+
+			var metaInfo = await m_context.MetaInfoSet.FirstOrDefaultAsync(m => m.Id == id);
+			string file = Chunker.MergeChunks(chunks, metaInfo.Name);
+
+			var memory = new MemoryStream();
+			using (var stream = new FileStream(file, FileMode.Open))
+			{
+				await stream.CopyToAsync(memory);
+			}
+			memory.Position = 0;
+
+			new FileExtensionContentTypeProvider().TryGetContentType(file, out string contentType);
+			return File(memory, contentType ?? "application/octet-stream", $"{Path.GetFileName(file)}.{metaInfo.Type}");
+		}
+
 		[HttpPost]
 		[RequestFormLimits(MultipartBodyLengthLimit = 209715200)]
 		[RequestSizeLimit(209715200)]
@@ -83,33 +109,6 @@ namespace WebAPI.Controllers
 
 			return Created("", metaInfo);
 		}
-
-		[HttpGet("{fileName}")]
-		public async Task<IActionResult> GetFile(string fileName)  
-		{  
-			if (fileName == null)  
-				return Content("filename not present");
-
-			var chunks = m_context.ChunkInfoSet
-				.Where(f => f.MetaInfo.Name == Path.GetFileNameWithoutExtension(fileName))
-				.Include(l => l.LocationInfo)
-				.ToList();
-
-			if(chunks.Count == 0)
-				return Content("filename does not exist");
-
-			string file = Chunker.MergeChunks(chunks, fileName);
-
-			var memory = new MemoryStream();
-			using (var stream = new FileStream(file, FileMode.Open))
-			{
-				await stream.CopyToAsync(memory);
-			}
-			memory.Position = 0;
-
-			new FileExtensionContentTypeProvider().TryGetContentType(file, out string contentType);
-			return File(memory, contentType ?? "application/octet-stream", Path.GetFileName(file));
-		} 
 
 		/*[HttpDelete]
 		public async Task<ActionResult> DeleteLocation(int id)

@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using DAL;
 using DAL.Models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace WebAPI.Controllers
 {
+	[EnableCors("_myAllowSpecificOrigins")]
 	[ApiController]
 	[Route("api/[controller]")]
 	public class LocationController : ControllerBase

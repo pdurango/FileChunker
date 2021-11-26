@@ -22,6 +22,7 @@ import
     faPlus,
     faTasks,
     faCheck,
+    faDownload,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(faUserSecret);
@@ -42,5 +43,6 @@ library.add(faUpload);
 library.add(faPlus);
 library.add(faTasks);
 library.add(faCheck);
+library.add(faDownload);
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);

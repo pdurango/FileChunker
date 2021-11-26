@@ -1,10 +1,15 @@
 <template>
-  <div></div>
+  <div>
+    <FileList />
+  </div>
 </template>
 
 <script>
-export default {};
-</script>
+import FileList from "../components/FileList.vue";
 
-<style scoped>
-</style>
+export default {
+  components: {
+    FileList
+  }
+};
+</script>
