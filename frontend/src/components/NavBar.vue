@@ -3,8 +3,16 @@
     <!-- @transitionend="handleDrawer" -->
     <v-navigation-drawer v-model="drawer" app right stateless>
       <v-list>
-        <v-list-item v-for="link in routes" :key="link.name" router :to="link.path">
-          <div v-if="link.name == 'Home'" style="display: flex; font-weight: bold">
+        <v-list-item
+          v-for="link in routes"
+          :key="link.name"
+          router
+          :to="link.path"
+        >
+          <div
+            v-if="link.name == 'Home'"
+            style="display: flex; font-weight: bold"
+          >
             <v-list-item-action>
               <!-- <font-awesome-icon :icon="link.meta.icon" /> -->
             </v-list-item-action>
@@ -26,15 +34,30 @@
 
     <v-toolbar color="#003E5F" shrink-on-scroll class="nav-bar">
       <span class="hidden-sm-and-up">
-        <v-app-bar-nav-icon style="color: white" @click="drawer = !drawer"></v-app-bar-nav-icon>
+        <v-app-bar-nav-icon
+          style="color: white"
+          @click="drawer = !drawer"
+        ></v-app-bar-nav-icon>
       </span>
       <v-toolbar-title
         style="cursor: pointer; color: white"
         @click="$router.push({ name: 'Home' }).catch(() => {})"
-      >GoldenGate</v-toolbar-title>
+        >OneChunkBoi</v-toolbar-title
+      >
       <v-spacer />
-      <v-toolbar-items v-for="link in routes" :key="link.name" class="hidden-xs-only">
-        <v-btn plain text v-if="link.meta.renderRoute" router :to="link.path" color="white">
+      <v-toolbar-items
+        v-for="link in routes"
+        :key="link.name"
+        class="hidden-xs-only"
+      >
+        <v-btn
+          plain
+          text
+          v-if="link.meta.renderRoute"
+          router
+          :to="link.path"
+          color="white"
+        >
           <font-awesome-icon class="mr-1" :icon="link.meta.icon" />
           {{ link.name }}
         </v-btn>

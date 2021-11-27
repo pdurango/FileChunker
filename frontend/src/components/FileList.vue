@@ -5,21 +5,17 @@
         <!--class="mr-auto"-->
         <h1>Files</h1>
       </v-col>
-      <!-- <v-col cols="auto">
+      <v-col cols="auto">
         <v-btn
           icon
           small
           class="mx-2"
           elevation="2"
-          @click="
-            $router.push({
-              name: 'JobInfoManagementNew'
-            })
-          "
+          @click="addFileDialog = true"
         >
           <font-awesome-icon :icon="['fas', 'plus']" />
         </v-btn>
-      </v-col> -->
+      </v-col>
     </v-row>
     <v-data-table
       class="elevation-1"
@@ -59,8 +55,16 @@
         </v-btn>
       </template>
     </v-data-table>
+
     <LoadingDialog v-model="loadingFileDialog" :text="loadingFileDialogText">
     </LoadingDialog>
+
+    <v-dialog v-model="addFileDialog" persistent width="unset">
+      <!--The v-if on the component makes sure that the component is killed once the dialog closes, so all data is cleared-->
+      <AddFile v-if="addFileDialog" @cancelFileUpload="addFileDialog = false">
+      </AddFile>
+    </v-dialog>
+
     <v-snackbar v-model="snackbar" :timeout="snackbarTimeout">
       {{ snackbarText }}
       <template v-slot:action="{ attrs }">
@@ -75,11 +79,13 @@
 <script>
 import moment from "moment";
 import LoadingDialog from "./LoadingDialog.vue";
+import AddFile from "./AddFile.vue";
 
 export default {
   name: "FileList",
   components: {
-    LoadingDialog
+    LoadingDialog,
+    AddFile
   },
   data: () => ({
     headers: [
@@ -101,7 +107,8 @@ export default {
     loadingFileDialogText: "",
     snackbar: false,
     snackbarText: "",
-    snackbarTimeout: 3000
+    snackbarTimeout: 3000,
+    addFileDialog: false
   }),
   methods: {
     getDateTextField(date) {
