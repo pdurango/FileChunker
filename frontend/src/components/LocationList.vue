@@ -5,21 +5,17 @@
         <!--class="mr-auto"-->
         <h1>Locations</h1>
       </v-col>
-      <!-- <v-col cols="auto">
+      <v-col cols="auto">
         <v-btn
           icon
           small
           class="mx-2"
           elevation="2"
-          @click="
-            $router.push({
-              name: 'JobInfoManagementNew'
-            })
-          "
+          @click="addLocationDialog = true"
         >
           <font-awesome-icon :icon="['fas', 'plus']" />
         </v-btn>
-      </v-col> -->
+      </v-col>
     </v-row>
     <v-data-table
       class="elevation-1"
@@ -47,12 +43,34 @@
         </v-btn>
       </template>
     </v-data-table>
+    <v-dialog v-model="addLocationDialog" persistent width="unset">
+      <!--The v-if on the component makes sure that the component is killed once the dialog closes, so all data is cleared-->
+      <AddLocation
+        v-if="addLocationDialog"
+        @close-add-location="locationDialogClosed"
+      >
+      </AddLocation>
+    </v-dialog>
+
+    <v-snackbar v-model="snackbar" :timeout="snackbarTimeout">
+      {{ snackbarText }}
+      <template v-slot:action="{ attrs }">
+        <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
 <script>
+import AddLocation from "./AddLocation.vue";
+
 export default {
   name: "LocationList",
+  components: {
+    AddLocation
+  },
   data: () => ({
     headers: [
       {
@@ -66,7 +84,11 @@ export default {
     ],
     expanded: [],
     isDataLoading: true,
-    locations: []
+    locations: [],
+    addLocationDialog: false,
+    snackbar: false,
+    snackbarText: "",
+    snackbarTimeout: 3000
   }),
   methods: {
     async loadLocations() {
@@ -78,26 +100,30 @@ export default {
           this.isDataLoading = false;
         })
         .catch(err => {
-          console.log(err);
-          this.invalidConnection();
+          this.invalidConnection(err.response.data.detail);
         });
     },
     async deleteLocation(id) {
       await this.$api
-        .delete(`/location.${id}`)
+        .delete(`/location/${id}`)
         .then(() => {
+          this.createSnackbar(`Deleted location ${id}.`);
           this.loadLocations();
         })
         .catch(err => {
-          console.log(err);
-          this.invalidConnection();
+          this.invalidConnection(err.response.data.detail);
         });
     },
-    invalidConnection() {
-      this.jobs = [];
+    invalidConnection(message) {
+      this.createSnackbar(`Could not complete action. ${message}`);
+    },
+    createSnackbar(message) {
       this.snackbar = true;
-      this.snackbarText = "Cannot get job information from server.";
-      this.isDataLoading = true;
+      this.snackbarText = message;
+    },
+    locationDialogClosed() {
+      this.addLocationDialog = false;
+      this.loadLocations();
     }
   },
   created() {

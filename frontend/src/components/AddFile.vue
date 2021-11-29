@@ -44,13 +44,21 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="blue darken-1" text @click="submitFile">
+      <v-btn
+        color="blue darken-1"
+        text
+        @click="submitFile"
+        :disabled="newFile == null || selectedLocations.length == 0"
+      >
         Upload
       </v-btn>
-      <v-btn color="red darken-1" text @click="$emit('cancelFileUpload')">
+      <v-btn color="red darken-1" text @click="$emit('close-add-file')">
         Cancel
       </v-btn>
     </v-card-actions>
+    <v-alert v-if="message" border="left" color="blue-grey" dark>
+      {{ message }}
+    </v-alert>
   </v-card>
 </template>
 
@@ -60,6 +68,7 @@ export default {
   data() {
     return {
       newFile: undefined,
+      message: "",
       fileName: "",
       locations: [],
       selectedLocations: []
@@ -99,14 +108,10 @@ export default {
           }
         })
         .then(() => {
-          this.message = "";
-          this.uploadStep = false;
-          this.newFile = null;
-          this.newFileUploaded = false;
-          this.processFileContents();
+          this.$emit("close-add-file");
         })
         .catch(err => {
-          this.message = `Could not upload the file. ${err.response.data.message}`;
+          this.message = `Could not upload the file. ${err.response.data.detail}`;
           this.newFile = undefined;
         });
     },

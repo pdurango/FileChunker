@@ -61,7 +61,7 @@
 
     <v-dialog v-model="addFileDialog" persistent width="unset">
       <!--The v-if on the component makes sure that the component is killed once the dialog closes, so all data is cleared-->
-      <AddFile v-if="addFileDialog" @cancelFileUpload="addFileDialog = false">
+      <AddFile v-if="addFileDialog" @close-add-file="fileDialogClosed">
       </AddFile>
     </v-dialog>
 
@@ -123,8 +123,7 @@ export default {
           this.isDataLoading = false;
         })
         .catch(err => {
-          console.log(err);
-          this.invalidConnection();
+          this.invalidConnection(err.response.data);
         });
     },
     async deleteFile(id) {
@@ -134,8 +133,7 @@ export default {
           this.loadFiles();
         })
         .catch(err => {
-          console.log(err);
-          this.invalidConnection();
+          this.invalidConnection(err.response.data);
         });
     },
     async downloadFile(id) {
@@ -145,7 +143,7 @@ export default {
       await this.$api
         .get(`/file/${id}`, {
           responseType: "blob",
-          timeout: 60 * 1000, //1 minute
+          timeout: 600000, //10 minutes
           headers: {
             "Content-Type": "application/json"
           }
@@ -153,30 +151,40 @@ export default {
         .then(response => {
           this.loadingFileDialog = false;
           this.loadingFileDialogText = "";
-          this.snackbar = true;
-          this.snackbarText = "File downloaded successfully.";
 
-          var match = response.headers["content-disposition"].match(
-            /filename\s*=\s*"(.+)"/i
+          this.createSnackbar("File downloaded successfully.");
+          var filename = "";
+          var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+          var matches = filenameRegex.exec(
+            response.headers["content-disposition"]
           );
+
+          if (matches != null && matches[1]) {
+            filename = matches[1].replace(/['"]/g, "");
+          }
+
           const url = window.URL.createObjectURL(new Blob([response.data]));
           const link = document.createElement("a");
           link.href = url;
-          link.setAttribute("download", match[1]); //or any other extension
+          link.setAttribute("download", filename); //or any other extension
           document.body.appendChild(link);
           link.click();
         })
         .catch(err => {
-          console.log(err);
-          this.snackbar = true;
-          this.snackbarText = `Could not delete the plugin. ${err.response.data.message}`;
+          this.invalidConnection(err.response.data);
         });
     },
-    invalidConnection() {
-      this.jobs = [];
+    invalidConnection(message) {
+      this.createSnackbar(`Could not complete action. ${message}`);
+    },
+    createSnackbar(message) {
       this.snackbar = true;
-      this.snackbarText = "Cannot get job information from server.";
-      this.isDataLoading = true;
+      this.snackbarText = message;
+    },
+    fileDialogClosed() {
+      console.log("fileDialogClosed");
+      this.addfileDialog = false;
+      this.loadFiles();
     }
   },
   created() {

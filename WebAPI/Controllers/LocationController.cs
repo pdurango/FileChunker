@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using DAL;
 using DAL.Models;
@@ -46,10 +47,17 @@ namespace WebAPI.Controllers
 			return Created("", info);
 		}
 
-		[HttpDelete]
+		[HttpDelete("{id}")]
 		public async Task<ActionResult> DeleteLocation(int id)
 		{
 			var location = await m_context.LocationInfoSet.FirstOrDefaultAsync(l => l.Id == id);
+			if (location == null)
+				return Problem($"Location {id} doesn't exist.", statusCode: (int)HttpStatusCode.BadRequest);
+
+			if (m_context.ChunkInfoSet.Any(c => c.LocationInfo.Id == id))
+				return Problem($"Location {id} is currently being used for files.", 
+					statusCode: (int)HttpStatusCode.BadRequest);
+
 			m_context.Remove(location);
 			await m_context.SaveChangesAsync();
 

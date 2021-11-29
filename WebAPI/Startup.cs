@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DAL;
+using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
@@ -51,6 +52,18 @@ namespace WebAPI
 				options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 			});*/
 
+			//https://andrewlock.net/handling-web-api-exceptions-with-problemdetails-middleware/
+			services.AddProblemDetails(opts =>
+			{
+				// Control when an exception is included
+				opts.IncludeExceptionDetails = (ctx, ex) =>
+				{
+					// Fetch services from HttpContext.RequestServices
+					var env = ctx.RequestServices.GetRequiredService<IHostEnvironment>();
+					return env.IsDevelopment() || env.IsStaging();
+				};
+			});
+
 			services.AddCors(o => o.AddPolicy(MyAllowSpecificOrigins, builder =>
 			{
 				builder.AllowAnyOrigin()
@@ -63,10 +76,11 @@ namespace WebAPI
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			if (env.IsDevelopment())
-			{
+			/*if (env.IsDevelopment())
 				app.UseDeveloperExceptionPage();
-			}
+			else
+				app.UseProblemDetails();*/
+			app.UseProblemDetails();
 
 			app.UseHttpsRedirection();
 

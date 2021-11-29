@@ -41,6 +41,8 @@ namespace FileChunker
 
                 idx++;
             }
+
+            Console.WriteLine($"SplitFile: 100%");
         }
 
         public static List<ChunkInfo> ScatterChunks(
@@ -84,7 +86,7 @@ namespace FileChunker
                     if (Directory.Exists(destination))
                         Directory.Delete(destination, true);
 
-                    Directory.CreateDirectory(destination); //Need to create directory once for each location
+                    DirectoryInfo x = Directory.CreateDirectory(destination); //Need to create directory once for each location
                 }
 
                 File.Move(files[i], Path.Combine(destination, Path.GetFileName(files[i])));
@@ -106,12 +108,13 @@ namespace FileChunker
                 }
             }
 
+            Console.WriteLine($"ScatterChunks: 100%");
             return chunks;
         }
 
-        public static string MergeChunks(List<ChunkInfo> chunks, string fileName)
+        public static string MergeChunks(List<ChunkInfo> chunks, MetaInfo file)
         {
-            var fileNameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+            var fileNameWithoutExt = Path.GetFileNameWithoutExtension(file.Name);
             var tmpFolder = Path.Combine(Path.GetTempPath(), fileNameWithoutExt);
 
             if (Directory.Exists(tmpFolder))
@@ -120,21 +123,34 @@ namespace FileChunker
             Directory.CreateDirectory(tmpFolder);
 
             //todo - why do i do this?
-            foreach (var chunk in chunks)
+            int percentage = 0;
+            for (int i = 0, count = chunks.Count; i < count; i++)
+            {
+                ChunkInfo chunk = chunks[i];
                 File.Copy(
-                    Path.Combine(chunk.LocationInfo.Path, fileNameWithoutExt, chunk.Name), 
+                    Path.Combine(chunk.LocationInfo.Path, fileNameWithoutExt, chunk.Name),
                     Path.Combine(tmpFolder, chunk.Name));
 
-            return MergeChunks(tmpFolder, fileName);
+
+                int currentPercentage = ((i * 100) / count);
+                if (currentPercentage > percentage)
+                {
+                    percentage = currentPercentage;
+                    Console.WriteLine($"MergeChunks preparing files: {percentage}%");
+                }
+            }
+
+            return MergeChunks(tmpFolder, file);
         }
 
-        public static string MergeChunks(string directory, string fileName)
+        public static string MergeChunks(string directory, MetaInfo file)
         {
             //Need to fetch files in order - this seems inefficient so find a better solution
             var inputFiles = Directory.GetFiles(directory)
                 .OrderBy(n => Convert.ToInt32(Path.GetFileNameWithoutExtension(n))).ToList();
 
             int percentage = 0;
+            string fileName = $"{file.Name}.{file.Type}";
             string destFile = Path.Combine(directory, fileName);
             using var outputStream = File.Create(Path.Combine(directory, fileName));
             for(int i = 0, fileCount = inputFiles.Count; i < fileCount; i++)
@@ -153,7 +169,16 @@ namespace FileChunker
                 //Console.WriteLine("The file {0} has been processed.", inputFilePath);
             }
 
+            Console.WriteLine($"MergeChunks: 100%");
             return destFile;
+        }
+
+        public static void DeleteChunks(string[] paths, string fileName)
+        {
+            foreach (var path in paths)
+            {
+                Directory.Delete(Path.Combine(path, fileName), true);
+            }
         }
     }
 }
