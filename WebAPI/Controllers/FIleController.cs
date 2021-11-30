@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using ChunkServiceHandler;
 using DAL;
 using DAL.Models;
-using FileChunker;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -51,7 +50,8 @@ namespace WebAPI.Controllers
 				return Content("File does not exist.");
 
 			var metaInfo = await m_context.MetaInfoSet.FirstOrDefaultAsync(m => m.Id == id);
-			string file = ChunkService.MergeChunks(chunks, metaInfo);
+			
+			string file = m_chunkService.DownloadFile(chunks, metaInfo);
 
 			var memory = new MemoryStream();
 			using (var stream = new FileStream(file, FileMode.Open))
@@ -103,8 +103,7 @@ namespace WebAPI.Controllers
 
 			try
 			{
-				ChunkService.SplitFile(tmpFile, chunkDir);
-				List<ChunkInfo> chunks = ChunkService.ScatterChunks(chunkDir, locationsList, metaInfo);
+				List<ChunkInfo>  chunks = m_chunkService.UploadFile(tmpFile, locationsList, metaInfo);
 
 				await m_context.ChunkInfoSet.AddRangeAsync(chunks);
 				await m_context.SaveChangesAsync();
@@ -131,10 +130,12 @@ namespace WebAPI.Controllers
 				.Include(l => l.LocationInfo)
 				.ToList();
 
-			var paths = chunks.Select(c => c.LocationInfo.Path).Distinct().ToArray();
+			var paths = chunks.Select(c => c.LocationInfo.Id).Distinct().ToArray();
 			var metaInfo = await m_context.MetaInfoSet.FirstOrDefaultAsync(m => m.Id == id);
-			
-			ChunkService.DeleteChunks(paths, metaInfo.Name);
+			var locations = await m_context.LocationInfoSet.Where(l => paths.Contains(l.Id)).ToListAsync();
+
+			m_chunkService.DeleteFile(locations, metaInfo);
+
 			m_context.RemoveRange(chunks);
 			m_context.Remove(metaInfo);
 			await m_context.SaveChangesAsync();

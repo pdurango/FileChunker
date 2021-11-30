@@ -123,7 +123,7 @@ export default {
           this.isDataLoading = false;
         })
         .catch(err => {
-          this.invalidConnection(err.response.data);
+          this.invalidConnection(err.response.data.detail);
         });
     },
     async deleteFile(id) {
@@ -133,7 +133,7 @@ export default {
           this.loadFiles();
         })
         .catch(err => {
-          this.invalidConnection(err.response.data);
+          this.invalidConnection(err.response.data.detail);
         });
     },
     async downloadFile(id) {
@@ -171,7 +171,7 @@ export default {
           link.click();
         })
         .catch(err => {
-          this.invalidConnection(err.response.data);
+          this.invalidConnection(err.response.data.detail);
         });
     },
     invalidConnection(message) {

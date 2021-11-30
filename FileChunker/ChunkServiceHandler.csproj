@@ -1,17 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="ChunkMover.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="ChunkMover.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DAL\DAL.csproj" />

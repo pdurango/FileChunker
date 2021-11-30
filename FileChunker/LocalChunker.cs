@@ -23,7 +23,7 @@ namespace ChunkServiceHandler
 
             int locationIdx = 0, curBucketCount = 0, percentage = 0;
             //Number of total buckets to create
-            int bucketSize = fileCount / locationCount; //make sure location has enough space - sans
+            int bucketSize = fileCount / locationCount;
 
             for (int i = 0; i < fileCount; i++)
             {

@@ -9,7 +9,22 @@ namespace ChunkServiceHandler
 {
 	public class ChunkService
 	{
-        private const int BUFFER_SIZE = 20 * 1024; //20480B, 20.48KB
+        public List<ChunkInfo> UploadFile(string file, List<LocationInfo> locations, MetaInfo metaInfo)
+        {
+            return new List<ChunkInfo>();
+        }
+
+        public string DownloadFile(List<ChunkInfo> chunks, MetaInfo metaInfo)
+        {
+            return "";
+        }
+
+        public bool DeleteFile(List<LocationInfo> locations, MetaInfo metaInfo)
+        {
+            return true;
+        }
+
+        /*private const int BUFFER_SIZE = 20 * 1024; //20480B, 20.48KB
         private const int CHUNK_SIZE = 4 * 1024;
 
         public static void SplitFile(string file, string outputDir)
@@ -64,13 +79,13 @@ namespace ChunkServiceHandler
 
             for (int i = 0; i < fileCount; i++)
             {
-                /*
+                *//*
                  * 1. Iterate through files
                  * 2. Add chunks to current location
                  * 3. Once a location gets all its allocated chunks (total chunks / total locations), 
                  *    need to reset the chunk counter and increment destination location
                  * 4. Repeat
-                 */
+                 *//*
 
                 //Second condtion - If chunks aren't evenly divisble by locations, get remainder and add to last grouping
                 if (curBucketCount == bucketSize && locationIdx != locationCount - 1)
@@ -179,6 +194,6 @@ namespace ChunkServiceHandler
             {
                 Directory.Delete(Path.Combine(path, fileName), true);
             }
-        }
+        }*/
     }
 }

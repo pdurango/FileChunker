@@ -7,6 +7,10 @@ using static DAL.Models.LocationInfo;
 
 namespace ChunkServiceHandler
 {
+    //todo
+    //need to check capacity of each location before starting chunker
+    //implement hangfire so tasks can run in background (when dowloading/uploading large files)
+
 	interface IChunker
 	{
 		const int BUFFER_SIZE = 20 * 1024; //20480B, 20.48KB
@@ -68,8 +72,8 @@ namespace ChunkServiceHandler
 		{
             if (type == LocationType.local)
                 return new LocalChunker();
-			else if (type == LocationType.gdrive)
-				return new GDriveChunker();
+			/*else if (type == LocationType.gdrive)
+				return new GDriveChunker();*/
 			else
 				throw new NotImplementedException(
 					$"Location type {type.ToString()} is not supported.");

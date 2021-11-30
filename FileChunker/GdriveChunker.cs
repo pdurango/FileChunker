@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ChunkServiceHandler
 {
-	internal class GDriveChunker : IChunker
+	/*internal class GDriveChunker : IChunker
 	{
-	}
+	}*/
 }
