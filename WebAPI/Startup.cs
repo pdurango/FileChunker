@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ChunkServiceHandler;
 using DAL;
 using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Builder;
@@ -34,6 +35,8 @@ namespace WebAPI
 			//Add-Migration NewMigration -Project DAL
 			services.AddDbContext<DataContext>(
 				opts => opts.UseSqlServer(Configuration.GetConnectionString("FileChunkerDB")));
+
+			services.AddSingleton<ChunkService>();
 
 			services.AddControllers().AddNewtonsoftJson(options =>
 				options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore

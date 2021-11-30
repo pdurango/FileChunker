@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace FileChunker
+namespace ChunkServiceHandler
 {
-	public static class Chunker
+	public class ChunkService
 	{
         private const int BUFFER_SIZE = 20 * 1024; //20480B, 20.48KB
         private const int CHUNK_SIZE = 4 * 1024;

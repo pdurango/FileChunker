@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ChunkServiceHandler;
 using DAL;
 using DAL.Models;
 using FileChunker;
@@ -22,11 +23,13 @@ namespace WebAPI.Controllers
 	{
 		private readonly ILogger<LocationController> m_logger;
 		private readonly DataContext m_context;
+		private readonly ChunkService m_chunkService;
 
-		public FileController(ILogger<LocationController> logger, DataContext context)
+		public FileController(ILogger<LocationController> logger, DataContext context, ChunkService chunkService)
 		{
 			m_logger = logger;
 			m_context = context;
+			m_chunkService = chunkService;
 		}
 
 		[HttpGet]
@@ -48,7 +51,7 @@ namespace WebAPI.Controllers
 				return Content("File does not exist.");
 
 			var metaInfo = await m_context.MetaInfoSet.FirstOrDefaultAsync(m => m.Id == id);
-			string file = Chunker.MergeChunks(chunks, metaInfo);
+			string file = ChunkService.MergeChunks(chunks, metaInfo);
 
 			var memory = new MemoryStream();
 			using (var stream = new FileStream(file, FileMode.Open))
@@ -76,9 +79,7 @@ namespace WebAPI.Controllers
 			var fileName = similarFileCount == 0 ? file.FileName : $"({similarFileCount}){file.FileName}";
 			//where the file will be stored temporarily
 			var tmpFile = Path.Combine(Path.GetTempPath(), fileName);
-			//where the file chunks will be stored temporarily
-			var chunkDir = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(fileName));
-			Directory.CreateDirectory(chunkDir);
+
 			using (var stream = new FileStream(tmpFile, FileMode.Create))
 			{
 				await file.CopyToAsync(stream);
@@ -94,9 +95,7 @@ namespace WebAPI.Controllers
 					.ToList();
 			}
 			else
-			{
 				locationsList = m_context.LocationInfoSet.ToList();
-			}
 
 			var metaInfo = new MetaInfo(fileName);
 			await m_context.MetaInfoSet.AddAsync(metaInfo);
@@ -104,8 +103,8 @@ namespace WebAPI.Controllers
 
 			try
 			{
-				Chunker.SplitFile(tmpFile, chunkDir);
-				List<ChunkInfo> chunks = Chunker.ScatterChunks(chunkDir, locationsList, metaInfo);
+				ChunkService.SplitFile(tmpFile, chunkDir);
+				List<ChunkInfo> chunks = ChunkService.ScatterChunks(chunkDir, locationsList, metaInfo);
 
 				await m_context.ChunkInfoSet.AddRangeAsync(chunks);
 				await m_context.SaveChangesAsync();
@@ -119,7 +118,6 @@ namespace WebAPI.Controllers
 			finally
 			{
 				System.IO.File.Delete(tmpFile);
-				Directory.Delete(chunkDir, true);
 			}
 
 			return Created("", metaInfo);
@@ -136,7 +134,7 @@ namespace WebAPI.Controllers
 			var paths = chunks.Select(c => c.LocationInfo.Path).Distinct().ToArray();
 			var metaInfo = await m_context.MetaInfoSet.FirstOrDefaultAsync(m => m.Id == id);
 			
-			Chunker.DeleteChunks(paths, metaInfo.Name);
+			ChunkService.DeleteChunks(paths, metaInfo.Name);
 			m_context.RemoveRange(chunks);
 			m_context.Remove(metaInfo);
 			await m_context.SaveChangesAsync();
