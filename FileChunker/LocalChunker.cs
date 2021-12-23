@@ -9,71 +9,28 @@ namespace ChunkServiceHandler
 {
 	public class LocalChunker : IChunker
 	{
-        public List<ChunkInfo> ScatterChunks(string directory, List<LocationInfo> locations, MetaInfo metaInfo)
-		{
-            var files = Directory.GetFiles(directory)
-               .OrderBy(n => Convert.ToInt32(Path.GetFileNameWithoutExtension(n))).ToList();
-            int fileCount = files.Count;
-            int locationCount = locations.Count;
+        private string m_destination;
 
-            if (fileCount <= 0 || locationCount <= 0)
-                return null;
+        public bool Initialize(LocationInfo location, MetaInfo metaInfo)
+        {
+            //Add chunks to location+fileName directory
+            m_destination = Path.Combine(location.Path, metaInfo.Name);
 
-            var chunks = new List<ChunkInfo>();
+            if (Directory.Exists(m_destination))
+                Directory.Delete(m_destination, true);
 
-            int locationIdx = 0, curBucketCount = 0, percentage = 0;
-            //Number of total buckets to create
-            int bucketSize = fileCount / locationCount;
+            //Need to create directory once for each location
+            Directory.CreateDirectory(m_destination);
 
-            for (int i = 0; i < fileCount; i++)
-            {
-                /*
-                 * 1. Iterate through files
-                 * 2. Add chunks to current location
-                 * 3. Once a location gets all its allocated chunks (total chunks / total locations), 
-                 *    need to reset the chunk counter and increment destination location
-                 * 4. Repeat
-                 */
-
-                //Second condtion - If chunks aren't evenly divisble by locations, get remainder and add to last grouping
-                if (curBucketCount == bucketSize && locationIdx != locationCount - 1)
-                {
-                    curBucketCount = 0;
-                    locationIdx++; //Once the bucket is full, move to next location to add chunks
-                }
-
-                //Add chunks to location+fileName directory
-                var destination = Path.Combine(locations[locationIdx].Path, metaInfo.Name);
-                if (curBucketCount == 0)
-                {
-                    if (Directory.Exists(destination))
-                        Directory.Delete(destination, true);
-
-                    DirectoryInfo x = Directory.CreateDirectory(destination); //Need to create directory once for each location
-                }
-
-                File.Move(files[i], Path.Combine(destination, Path.GetFileName(files[i])));
-
-                chunks.Add(new ChunkInfo
-                {
-                    MetaInfo = metaInfo,
-                    LocationInfo = locations[locationIdx],
-                    Name = Path.GetFileNameWithoutExtension(files[i])
-                });
-
-                curBucketCount++;
-
-                int currentPercentage = ((i * 100) / fileCount);
-                if (currentPercentage > percentage)
-                {
-                    percentage = currentPercentage;
-                    Console.WriteLine($"ScatterChunks: {percentage}%");
-                }
-            }
-
-            Console.WriteLine($"ScatterChunks: 100%");
-            return chunks;
+            return true;
         }
+
+
+        public void ScatterChunk(string file)
+		{
+            File.Move(file, Path.Combine(m_destination, Path.GetFileName(file)));
+        }
+
         public string MergeChunks(List<ChunkInfo> chunks, MetaInfo file)
         {
             var fileNameWithoutExt = Path.GetFileNameWithoutExtension(file.Name);
