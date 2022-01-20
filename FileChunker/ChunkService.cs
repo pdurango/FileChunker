@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using static DAL.Models.LocationInfo;
 
 namespace ChunkServiceHandler
 {
@@ -29,6 +30,8 @@ namespace ChunkServiceHandler
 
             //Start off with first location type
             var locationChunker = ChunkerFactory.GetChunkerClass(locations[0].Type);
+            if (!locationChunker.Initialize(locations[0], metaInfo))
+                throw new Exception("Could not create location chunker instance");
 
             int locationIdx = 0, curBucketCount = 0, percentage = 0;
             //Number of total buckets to create
@@ -81,12 +84,53 @@ namespace ChunkServiceHandler
 
         public string DownloadFile(List<ChunkInfo> chunks, MetaInfo metaInfo)
         {
-            return "";
+            LocationType currentLocType = LocationType.local; //default
+            IChunker locationChunker = null;
+
+            int percentage = 0;
+            string fileName = $"{metaInfo.Name}.{metaInfo.Type}";
+            string destFile = Path.Combine(Path.GetTempPath(), fileName);
+            using var outputStream = File.Create(destFile);
+
+            for (int i = 0, fileCount = chunks.Count; i < fileCount; i++)
+            {
+                ChunkInfo chunk = chunks[i];
+                /*
+                 * Either chunker has not been initalized, or the current chunk is at a different location
+                 * so need to reset chunker.
+                 * Note: chunk locations are created in batches, so Initialize should only be called for 
+                 * X locations.
+                 */
+                if (locationChunker == null || currentLocType != chunk.LocationInfo.Type)
+                {
+                    locationChunker = ChunkerFactory.GetChunkerClass(chunk.LocationInfo.Type);
+                    if (!locationChunker.Initialize(chunk.LocationInfo, metaInfo))
+                        throw new Exception("Could not create location chunker instance");
+                }
+
+                //call chunker GetFile or something
+                //handle the merging of files here
+
+                using var inputStream = File.OpenRead(locationChunker.GetChunk(chunk));
+                // Buffer size can be passed as the second argument.
+                inputStream.CopyTo(outputStream);
+
+                int currentPercentage = ((i * 100) / fileCount);
+                if (currentPercentage > percentage)
+                {
+                    percentage = currentPercentage;
+                    Console.WriteLine($"MergeChunks: {percentage}%");
+                }
+
+                //Console.WriteLine("The file {0} has been processed.", inputFilePath);
+            }
+
+            return destFile;
         }
 
         public bool DeleteFile(List<LocationInfo> locations, MetaInfo metaInfo)
         {
-            return true;
+            throw new NotImplementedException();
         }
 
         private static string SplitFile(string file) //returns temp dir containing chunks

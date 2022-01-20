@@ -16,8 +16,9 @@ namespace ChunkServiceHandler
         //string TempChunkDir { get; set; }
         abstract bool Initialize(LocationInfo location, MetaInfo metaInfo); //return if initialized properly
         abstract void ScatterChunk(string file);
-        abstract string MergeChunks(List<ChunkInfo> chunks, MetaInfo file);
-        abstract string MergeChunks(string directory, MetaInfo file);
+        //abstract string MergeChunks(List<ChunkInfo> chunks, MetaInfo file);
+        //abstract string MergeChunks(string directory, MetaInfo file);
+        abstract string GetChunk(ChunkInfo chunk);
         abstract void DeleteChunks(string[] paths, string fileName);
 
         //todo - maybe we can delete when we move them?

@@ -47,7 +47,7 @@ namespace WebAPI.Controllers
 				.ToList();
 
 			if (chunks.Count == 0)
-				return Content("File does not exist.");
+				return NotFound("File does not exist.");
 
 			var metaInfo = await m_context.MetaInfoSet.FirstOrDefaultAsync(m => m.Id == id);
 			
@@ -72,7 +72,7 @@ namespace WebAPI.Controllers
 		public async Task<ActionResult> AddFile(IFormFile file, [FromForm] string locations = null)
 		{
 			if (file == null || file.Length == 0)
-				return Content("file not selected");
+				return BadRequest("File not selected.");
 
 			int similarFileCount = m_context.MetaInfoSet
 				.Count(f => f.Name.EndsWith(Path.GetFileNameWithoutExtension(file.FileName )));

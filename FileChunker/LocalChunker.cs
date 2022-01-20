@@ -16,8 +16,9 @@ namespace ChunkServiceHandler
             //Add chunks to location+fileName directory
             m_destination = Path.Combine(location.Path, metaInfo.Name);
 
-            if (Directory.Exists(m_destination))
-                Directory.Delete(m_destination, true);
+            //this is bad, will break for thing ssuch as getchunk, since itll delete the folder which is not what i want
+            /*if (Directory.Exists(m_destination))
+                Directory.Delete(m_destination, true);*/
 
             //Need to create directory once for each location
             Directory.CreateDirectory(m_destination);
@@ -25,13 +26,22 @@ namespace ChunkServiceHandler
             return true;
         }
 
-
         public void ScatterChunk(string file)
 		{
-            File.Move(file, Path.Combine(m_destination, Path.GetFileName(file)));
+            string newFile = Path.Combine(m_destination, Path.GetFileName(file));
+            if (File.Exists(newFile))
+                File.Delete(newFile);
+
+            File.Move(file, newFile);
         }
 
-        public string MergeChunks(List<ChunkInfo> chunks, MetaInfo file)
+        public string GetChunk(ChunkInfo chunk)
+        {
+            //return filepath of chunk
+            return Path.Combine(m_destination, chunk.Name);
+        }
+
+        /*public string MergeChunks(List<ChunkInfo> chunks, MetaInfo file)
         {
             var fileNameWithoutExt = Path.GetFileNameWithoutExtension(file.Name);
             var tmpFolder = Path.Combine(Path.GetTempPath(), fileNameWithoutExt);
@@ -89,7 +99,7 @@ namespace ChunkServiceHandler
 
             Console.WriteLine($"MergeChunks: 100%");
             return destFile;
-        }
+        }*/
 
         public void DeleteChunks(string[] paths, string fileName)
         {
