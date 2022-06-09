@@ -65,7 +65,7 @@ namespace ChunkServiceHandler
                 {
                     MetaInfo = metaInfo,
                     LocationInfo = locations[locationIdx],
-                    Name = Path.GetFileNameWithoutExtension(files[i])
+                    FileNumber = i //Path.GetFileNameWithoutExtension(files[i])
                 });
 
                 curBucketCount++;
@@ -85,28 +85,42 @@ namespace ChunkServiceHandler
         public string DownloadFile(List<ChunkInfo> chunks, MetaInfo metaInfo)
         {
             LocationType currentLocType = LocationType.local; //default
-            IChunker locationChunker = null;
 
             int percentage = 0;
             string fileName = $"{metaInfo.Name}.{metaInfo.Type}";
             string destFile = Path.Combine(Path.GetTempPath(), fileName);
             using var outputStream = File.Create(destFile);
 
+            var chunkerClasses = new Dictionary<int, IChunker>(); //locationId, chunkerclass
+
             for (int i = 0, fileCount = chunks.Count; i < fileCount; i++)
             {
                 ChunkInfo chunk = chunks[i];
+
                 /*
                  * Either chunker has not been initalized, or the current chunk is at a different location
                  * so need to reset chunker.
                  * Note: chunk locations are created in batches, so Initialize should only be called for 
                  * X locations.
                  */
-                if (locationChunker == null || currentLocType != chunk.LocationInfo.Type)
-                {
-                    locationChunker = ChunkerFactory.GetChunkerClass(chunk.LocationInfo.Type);
-                    if (!locationChunker.Initialize(chunk.LocationInfo, metaInfo))
+                /*                if (locationChunker == null ||
+                                    currentLocType != chunk.LocationInfo.Type)
+                                {
+                                    locationChunker = ChunkerFactory.GetChunkerClass(chunk.LocationInfo.Type);
+                                    if (!locationChunker.Initialize(chunk.LocationInfo, metaInfo))
+                                        throw new Exception("Could not create location chunker instance");
+                                }*/
+
+                if (!chunkerClasses.ContainsKey(chunk.LocationInfo.Id))
+				{
+                    var tmp = ChunkerFactory.GetChunkerClass(chunk.LocationInfo.Type);
+                    if (!tmp.Initialize(chunk.LocationInfo, metaInfo))
                         throw new Exception("Could not create location chunker instance");
+
+                    chunkerClasses.Add(chunk.LocationInfo.Id, tmp);
                 }
+
+                IChunker locationChunker = chunkerClasses[chunk.LocationInfo.Id];
 
                 //call chunker GetFile or something
                 //handle the merging of files here

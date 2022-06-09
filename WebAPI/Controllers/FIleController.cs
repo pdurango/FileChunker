@@ -44,6 +44,7 @@ namespace WebAPI.Controllers
 			var chunks = m_context.ChunkInfoSet
 				.Where(f => f.MetaInfo.Id == id)
 				.Include(l => l.LocationInfo)
+				.OrderBy(c => c.FileNumber)
 				.ToList();
 
 			if (chunks.Count == 0)

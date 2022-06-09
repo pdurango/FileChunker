@@ -38,7 +38,7 @@ namespace ChunkServiceHandler
         public string GetChunk(ChunkInfo chunk)
         {
             //return filepath of chunk
-            return Path.Combine(m_destination, chunk.Name);
+            return Path.Combine(m_destination, chunk.FileNumber.ToString());
         }
 
         /*public string MergeChunks(List<ChunkInfo> chunks, MetaInfo file)
