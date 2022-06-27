@@ -34,11 +34,13 @@ namespace ChunkServiceHandler
 		{
             if (type == LocationType.local)
                 return new LocalChunker();
-			/*else if (type == LocationType.gdrive)
-				return new GDriveChunker();*/
-			else
+			else if (type == LocationType.googleDrive)
+				return new GoogleDriveChunker();
+            else if (type == LocationType.dropbox)
+                return new DropboxChunker();
+            else
 				throw new NotImplementedException(
-					$"Location type {type.ToString()} is not supported.");
+					$"Location type {type} is not supported.");
 		}
 	}
 }

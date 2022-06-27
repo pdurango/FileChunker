@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "WebAPI\WebAPI.csproj", "{D370100A-61F3-46EE-B434-F97A2C7970BA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DropboxApi", "DropboxApi\DropboxApi.csproj", "{233356CD-5D13-4FF5-88C5-404508DB99AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{D370100A-61F3-46EE-B434-F97A2C7970BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D370100A-61F3-46EE-B434-F97A2C7970BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D370100A-61F3-46EE-B434-F97A2C7970BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{233356CD-5D13-4FF5-88C5-404508DB99AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{233356CD-5D13-4FF5-88C5-404508DB99AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{233356CD-5D13-4FF5-88C5-404508DB99AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{233356CD-5D13-4FF5-88C5-404508DB99AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

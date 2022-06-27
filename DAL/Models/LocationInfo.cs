@@ -10,7 +10,8 @@ namespace DAL.Models
 		public enum LocationType
 		{
 			local,
-			gdrive,
+			googleDrive,
+			dropbox
 		}
 
 		[Key]
